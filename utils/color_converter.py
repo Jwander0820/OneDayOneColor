@@ -3,7 +3,8 @@ import colorsys
 
 class ColorConverter:
     @staticmethod
-    def rgb_to_hsv_by_colorsys(r, g, b):
+    def rgb_to_hsv_by_colorsys(rgb_color):
+        r, g, b = rgb_color
         h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
         h = round(h * 360)
         s = round(s * 100)
@@ -11,7 +12,8 @@ class ColorConverter:
         return h, s, v
 
     @staticmethod
-    def rgb_to_hsl_by_colorsys(r, g, b):
+    def rgb_to_hsl_by_colorsys(rgb_color):
+        r, g, b = rgb_color
         h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
         h = round(h * 360)
         l = round(l * 100)
@@ -19,13 +21,17 @@ class ColorConverter:
         return h, s, l
 
     @staticmethod
-    def rgb_to_hex(r, g, b):
-        hex_color = f"#{r:02x}{g:02x}{b:02x}"  # 轉換成十六進制
+    def rgb_to_hex(rgb_color):
+        r, g, b = rgb_color
+        hex_color = f"#{r:02X}{g:02X}{b:02X}"  # 轉換成十六進制
         return hex_color
 
     @staticmethod
-    def rgb_to_cmyk(r, g, b, round_setting=2, common_patterns=True):
+    def rgb_to_cmyk(rgb_color, round_setting=2, common_patterns=True):
+        r, g, b = rgb_color
         if r == 0 and g == 0 and b == 0:
+            if common_patterns:
+                return 0, 0, 0, 100
             return 0, 0, 0, 1
 
         r, g, b = r / 255.0, g / 255.0, b / 255.0
@@ -47,7 +53,8 @@ class ColorConverter:
         return c, m, y, k
 
     @staticmethod
-    def rgb_to_hsv(r, g, b, round_setting=2, common_patterns=True):
+    def rgb_to_hsv(rgb_color, round_setting=2, common_patterns=True):
+        r, g, b = rgb_color
         r, g, b = r / 255.0, g / 255.0, b / 255.0
         max_value = max(r, g, b)
         min_value = min(r, g, b)
@@ -81,7 +88,8 @@ class ColorConverter:
         return h, s, v
 
     @staticmethod
-    def rgb_to_hsl(r, g, b, round_setting=2, common_patterns=True):
+    def rgb_to_hsl(rgb_color, round_setting=2, common_patterns=True):
+        r, g, b = rgb_color
         r, g, b = r / 255.0, g / 255.0, b / 255.0
         max_value = max(r, g, b)
         min_value = min(r, g, b)
@@ -122,16 +130,16 @@ class ColorConverter:
 
 if __name__ == "__main__":
     # test color
-    r, g, b = (71, 21, 150)
+    _rgb_color = (71, 21, 150)  # r, g, b
 
     # convert
-    c, m, y, k = ColorConverter.rgb_to_cmyk(r, g, b)
-    hsv_h, hsv_s, hsv_v = ColorConverter.rgb_to_hsv(r, g, b)
-    hsl_h, hsl_s, hsl_l = ColorConverter.rgb_to_hsl(r, g, b)
-    hex_color = ColorConverter.rgb_to_hex(r, g, b)
+    c, m, y, k = ColorConverter.rgb_to_cmyk(_rgb_color)
+    hsv_h, hsv_s, hsv_v = ColorConverter.rgb_to_hsv(_rgb_color)
+    hsl_h, hsl_s, hsl_l = ColorConverter.rgb_to_hsl(_rgb_color)
+    hex_color = ColorConverter.rgb_to_hex(_rgb_color)
 
     # result
-    print("RGB:", r, g, b)
+    print("RGB:", _rgb_color)
     print(f"CMYK: {c}%, {m}%, {y}%, {k}%")
     print(f"HSV: {hsv_h}°, {hsv_s}%, {hsv_v}%")
     print(f"HSL: {hsl_h}°, {hsl_s}%, {hsl_l}%")
