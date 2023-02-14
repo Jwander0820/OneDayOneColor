@@ -2,7 +2,7 @@
 
 **這裡並不提供顏色占卜、幸運顏色、色色圖片等服務，就是單純的給你一張色圖!**
 
-**Wish you a nice color!**
+**Have a nice color!**
 
 Requirements
 ---
