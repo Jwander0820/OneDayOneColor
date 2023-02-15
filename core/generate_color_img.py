@@ -45,6 +45,10 @@ class GenerateColorImg:
             self.rgb_color = self.confirm_rgb_color()  # (r, g, b) 隨機顏色
         else:
             self.rgb_color = color  # 指定顏色
+            rgb_list = SQLiteOperator().select_rgb_color()  # 從DB取得現有顏色清單
+            if self._check_duplicate(self.rgb_color, rgb_list):  # 確認指定的顏色是否在DB中已存在
+                print("指定的顏色已存在，請重新選定顏色")
+                return
         self.color_img = Image.new("RGB", (self.width, self.height), self.rgb_color)  # 建立純色圖片
         self.cmyk_color, self.hsv_color, self.hsl_color, self.hex_color = self.get_color_convert_result(self.rgb_color)
         # 更新DB資料
@@ -67,8 +71,6 @@ class GenerateColorImg:
             if db_rgb_value[0] == str(rgb_color):
                 print("Data already exists")  # 有重複值
                 return True
-            else:
-                return False
         return False
 
     def confirm_rgb_color(self):
