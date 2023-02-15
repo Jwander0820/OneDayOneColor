@@ -1,6 +1,8 @@
 import sqlite3
 import time
 
+from utils.logger import log_filter_error
+
 DB_NAME = "odoc"
 # DB_NAME = "data"  # test use db in ./utils
 
@@ -13,6 +15,7 @@ def get_local_time():
 
 
 class SQLiteOperator:
+    @log_filter_error
     def init_db(self):
         """資料庫初始建立"""
         # 建立資料庫連接，如果資料庫不存在就建立它
@@ -35,6 +38,7 @@ class SQLiteOperator:
         conn.commit()
         conn.close()
 
+    @log_filter_error
     def insert_data(self, rgb_color, cmyk_color, hsv_color, hsl_color, hex_color):
         """插入資料"""
         conn = sqlite3.connect(f'{DB_NAME}.db')
@@ -47,6 +51,7 @@ class SQLiteOperator:
         conn.commit()
         conn.close()
 
+    @log_filter_error
     def select_rgb_color(self):
         """用於確認RGB值是否重複，回傳DB現有顏色清單"""
         conn = sqlite3.connect(f'{DB_NAME}.db')

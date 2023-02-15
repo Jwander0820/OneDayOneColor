@@ -7,7 +7,7 @@ if __name__ == "__main__":
     # sqlite_op.init_db()
 
     # 生成指定顏色圖片並更新DB資料
-    # color = (82, 32, 2)
+    # color = (0, 0, 0)
     # GenerateColorImg().generate_post_img(color=color, add_text=True, save_img=True)
 
     # 生成圖片資料至data中並更新DB資料

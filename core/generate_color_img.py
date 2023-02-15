@@ -4,6 +4,7 @@ import random
 from PIL import Image, ImageDraw, ImageFont
 
 from utils.color_converter import ColorConverter
+from utils.logger import create_logger, log_filter_error
 from utils.sqlite_operator import SQLiteOperator
 
 
@@ -33,6 +34,7 @@ class GenerateColorImg:
             self.save_color_img()
         return self.color_img
 
+    @log_filter_error
     def generate_post_img(self, color=None, add_text=True, save_img=False):
         """
         生成純色圖片，比對資料庫顏色，確保不會有重複顏色出現
@@ -41,18 +43,20 @@ class GenerateColorImg:
         :param save_img: 是否儲存圖片，預設為False
         :return:
         """
+        logger = create_logger()
         if not color:
             self.rgb_color = self.confirm_rgb_color()  # (r, g, b) 隨機顏色
         else:
             self.rgb_color = color  # 指定顏色
             rgb_list = SQLiteOperator().select_rgb_color()  # 從DB取得現有顏色清單
             if self._check_duplicate(self.rgb_color, rgb_list):  # 確認指定的顏色是否在DB中已存在
-                print("指定的顏色已存在，請重新選定顏色")
+                logger.info(f"指定的顏色已存在，請重新選定顏色 RGB: {self.rgb_color}")
                 return
         self.color_img = Image.new("RGB", (self.width, self.height), self.rgb_color)  # 建立純色圖片
         self.cmyk_color, self.hsv_color, self.hsl_color, self.hex_color = self.get_color_convert_result(self.rgb_color)
         # 更新DB資料
         SQLiteOperator().insert_data(self.rgb_color, self.cmyk_color, self.hsv_color, self.hsl_color, self.hex_color)
+        logger.info(f"Today Color is RGB: {self.rgb_color}, HEX:{self.hex_color}")
         if add_text:
             self.add_text()
         if save_img:
