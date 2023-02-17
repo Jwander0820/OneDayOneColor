@@ -3,6 +3,7 @@ import random
 
 from PIL import Image, ImageDraw, ImageFont
 
+from core.ig_operator import IGOperator
 from utils.color_converter import ColorConverter
 from utils.logger import create_logger, log_filter_error
 from utils.sqlite_operator import SQLiteOperator
@@ -10,7 +11,9 @@ from utils.sqlite_operator import SQLiteOperator
 
 class GenerateColorImg:
     def __init__(self):
+        self.rgb_color = None
         self.color_img = None
+        self.color_data = None
         self.width = 1200
         self.height = 1200
 
@@ -27,7 +30,8 @@ class GenerateColorImg:
         else:
             self.rgb_color = color  # 指定顏色
         self.color_img = Image.new("RGB", (self.width, self.height), self.rgb_color)  # 建立純色圖片
-        self.cmyk_color, self.hsv_color, self.hsl_color, self.hex_color = self.get_color_convert_result(self.rgb_color)
+        self.color_data = self.get_color_convert_result(self.rgb_color)
+        self.ig_post_text = IGOperator().post_text(self.color_data)
         if add_text:
             self.add_text()
         if save_img:
@@ -53,10 +57,11 @@ class GenerateColorImg:
                 logger.info(f"指定的顏色已存在，請重新選定顏色 RGB: {self.rgb_color}")
                 return
         self.color_img = Image.new("RGB", (self.width, self.height), self.rgb_color)  # 建立純色圖片
-        self.cmyk_color, self.hsv_color, self.hsl_color, self.hex_color = self.get_color_convert_result(self.rgb_color)
+        self.color_data = self.get_color_convert_result(self.rgb_color)  # 顏色轉換
+        self.ig_post_text = IGOperator().post_text(self.color_data)  # 生成IG貼文內容
         # 更新DB資料
-        SQLiteOperator().insert_data(self.rgb_color, self.cmyk_color, self.hsv_color, self.hsl_color, self.hex_color)
-        logger.info(f"Today Color is RGB: {self.rgb_color}, HEX:{self.hex_color}")
+        SQLiteOperator().insert_data(self.color_data)
+        logger.info(f"Today Color is RGB: {self.color_data['RGB']}, HEX:{self.color_data['HEX']}")
         if add_text:
             self.add_text()
         if save_img:
@@ -87,6 +92,11 @@ class GenerateColorImg:
         return rgb_color
 
     def get_color_convert_result(self, rgb_color):
+        """
+        RGB顏色轉換成不同格式的色彩空間
+        :param rgb_color: RGB色彩
+        :return: {"RGB": rgb_color, "CMYK": cmyk_color, "HSV": hsv_color, "HSL": hsl_color, "HEX": hex_color}
+        """
         cmyk_color = ColorConverter.rgb_to_cmyk(rgb_color)
         hsv_color = ColorConverter.rgb_to_hsv(rgb_color)
         hsl_color = ColorConverter.rgb_to_hsl(rgb_color)
@@ -96,7 +106,8 @@ class GenerateColorImg:
         print(f"HSV: {hsv_color}")
         print(f"HSL: {hsl_color}")
         print(f"HEX: {hex_color}")
-        return cmyk_color, hsv_color, hsl_color, hex_color
+        color_data = {"RGB": rgb_color, "CMYK": cmyk_color, "HSV": hsv_color, "HSL": hsl_color, "HEX": hex_color}
+        return color_data
 
     def add_text(self):
         # 基本設定
@@ -109,27 +120,27 @@ class GenerateColorImg:
         fill_color = (255, 255, 255)  # 白色
         draw.rectangle((left_top, right_bottom), fill=fill_color)
         # 添加文字
-        r, g, b = self.rgb_color
+        r, g, b = self.color_data["RGB"]
         text = f"RGB: ({r}, {g}, {b})"
         position = (20, 1020)
         draw.text(position, text, fill=font_color, font=font)
 
-        c, m, y, k = self.cmyk_color
+        c, m, y, k = self.color_data["CMYK"]
         text = f"CMYK: ({c}%, {m}%, {y}%, {k}%)"
         position = (600, 1020)
         draw.text(position, text, fill=font_color, font=font)
 
-        h, s, v = self.hsv_color
+        h, s, v = self.color_data["HSV"]
         text = f"HSV: ({h}°, {s}%, {v}%)"
         position = (20, 1080)
         draw.text(position, text, fill=font_color, font=font)
 
-        h, s, l = self.hsl_color
+        h, s, l = self.color_data["HSL"]
         text = f"HSL: ({h}°, {s}%, {l}%)"
         position = (600, 1080)
         draw.text(position, text, fill=font_color, font=font)
 
-        text = f"HEX: {self.hex_color}"
+        text = f"HEX: {self.color_data['HEX']}"
         position = (20, 1140)
         draw.text(position, text, fill=font_color, font=font)
 
@@ -137,9 +148,11 @@ class GenerateColorImg:
         if not os.path.exists(output_folder):  # 指定輸出資料夾，若資料夾不存在則建立
             os.makedirs(output_folder)
 
-        file_name = f"RGB{self.rgb_color}_CMYK{self.cmyk_color}_" \
-                    f"HSV{self.hsv_color}_HSL{self.hsl_color}_" \
-                    f"HEX{self.hex_color}"
+        file_name = f"RGB{self.color_data['RGB']}_" \
+                    f"CMYK{self.color_data['CMYK']}_" \
+                    f"HSV{self.color_data['HSV']}_" \
+                    f"HSL{self.color_data['HSL']}_" \
+                    f"HEX{self.color_data['HEX']}"
         self.color_img.save(f"{output_folder}/{file_name}.png")
 
 

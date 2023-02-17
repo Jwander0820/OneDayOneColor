@@ -39,14 +39,19 @@ class SQLiteOperator:
         conn.close()
 
     @log_filter_error
-    def insert_data(self, rgb_color, cmyk_color, hsv_color, hsl_color, hex_color):
+    def insert_data(self, color_data):
         """插入資料"""
         conn = sqlite3.connect(f'{DB_NAME}.db')
         cursor = conn.cursor()
         date = get_local_time()  # 取得當下時間
         # 操作插入資料
+        rgb_color = str(color_data["RGB"])
+        cmyk_color = str(color_data["CMYK"])
+        hsv_color = str(color_data["HSV"])
+        hsl_color = str(color_data["HSL"])
+        hex_color = color_data["HEX"]
         cursor.execute("INSERT INTO OneDayOneColor (date, rgb, cmyk, hsv, hsl, hex) VALUES (?, ?, ?, ?, ?, ?)",
-                       (date, str(rgb_color), str(cmyk_color), str(hsv_color), str(hsl_color), hex_color))
+                       (date, rgb_color, cmyk_color, hsv_color, hsl_color, hex_color))
 
         conn.commit()
         conn.close()
