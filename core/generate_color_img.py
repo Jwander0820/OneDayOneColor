@@ -36,7 +36,7 @@ class GenerateColorImg:
             self.add_text()
         if save_img:
             self.save_color_img()
-        return self.color_img
+        return self.color_img, self.rgb_color
 
     @log_filter_error
     def generate_post_img(self, color=None, add_text=True, save_img=False):
@@ -66,7 +66,13 @@ class GenerateColorImg:
             self.add_text()
         if save_img:
             self.save_color_img()
-        return self.color_img
+        return self.color_img, self.rgb_color
+
+    def get_post_text(self, color=None):
+        self.rgb_color = color
+        self.color_data = self.get_color_convert_result(self.rgb_color)  # 顏色轉換
+        self.ig_post_text = IGOperator().post_text(self.color_data)  # 生成IG貼文內容
+        print(self.ig_post_text)
 
     def get_random_color(self):
         r = random.randint(0, 255)
@@ -78,7 +84,7 @@ class GenerateColorImg:
         """用於確認RGB值是否重複"""
         for db_rgb_value in rgb_list:
             if db_rgb_value[0] == str(rgb_color):
-                print("Data already exists")  # 有重複值
+                # print("Data already exists")  # 有重複值
                 return True
         return False
 
@@ -101,11 +107,11 @@ class GenerateColorImg:
         hsv_color = ColorConverter.rgb_to_hsv(rgb_color)
         hsl_color = ColorConverter.rgb_to_hsl(rgb_color)
         hex_color = ColorConverter.rgb_to_hex(rgb_color)
-        print(f"RGB: {rgb_color}")
-        print(f"CMYK: {cmyk_color}")
-        print(f"HSV: {hsv_color}")
-        print(f"HSL: {hsl_color}")
-        print(f"HEX: {hex_color}")
+        # print(f"RGB: {rgb_color}")
+        # print(f"CMYK: {cmyk_color}")
+        # print(f"HSV: {hsv_color}")
+        # print(f"HSL: {hsl_color}")
+        # print(f"HEX: {hex_color}")
         color_data = {"RGB": rgb_color, "CMYK": cmyk_color, "HSV": hsv_color, "HSL": hsl_color, "HEX": hex_color}
         return color_data
 
@@ -157,5 +163,6 @@ class GenerateColorImg:
 
 
 if __name__ == "__main__":
-    color_img = GenerateColorImg().generate_img(color=(189, 8, 32), save_img=False)
+    color_img, rgb_color = GenerateColorImg().generate_img(color=(0, 0, 0), save_img=False)
     color_img.show()
+    GenerateColorImg().get_post_text(rgb_color)

@@ -10,5 +10,8 @@ if __name__ == "__main__":
     # color = (0, 0, 0)
     # GenerateColorImg().generate_post_img(color=color, add_text=True, save_img=True)
 
-    # 生成圖片資料至data中並更新DB資料
-    GenerateColorImg().generate_post_img(add_text=True, save_img=True)
+    # 生成隨機圖片資料至data中並更新DB資料
+    _, color = GenerateColorImg().generate_post_img(add_text=True, save_img=True)
+
+    # 單純生成貼文內容
+    GenerateColorImg().get_post_text(color)
