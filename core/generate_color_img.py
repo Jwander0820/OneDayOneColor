@@ -1,6 +1,7 @@
 import os
 import random
 
+import pyperclip
 from PIL import Image, ImageDraw, ImageFont
 
 from core.ig_operator import IGOperator
@@ -59,6 +60,7 @@ class GenerateColorImg:
         self.color_img = Image.new("RGB", (self.width, self.height), self.rgb_color)  # 建立純色圖片
         self.color_data = self.get_color_convert_result(self.rgb_color)  # 顏色轉換
         self.ig_post_text = IGOperator().post_text(self.color_data)  # 生成IG貼文內容
+        pyperclip.copy(self.ig_post_text)  # 將貼文內容儲存到剪貼板
         # 更新DB資料
         SQLiteOperator().insert_data(self.color_data)
         logger.info(f"Today Color is RGB: {self.color_data['RGB']}, HEX:{self.color_data['HEX']}")
@@ -150,7 +152,7 @@ class GenerateColorImg:
         position = (20, 1140)
         draw.text(position, text, fill=font_color, font=font)
 
-    def save_color_img(self, output_folder="./data"):
+    def save_color_img(self, output_folder="./tmp"):
         if not os.path.exists(output_folder):  # 指定輸出資料夾，若資料夾不存在則建立
             os.makedirs(output_folder)
 
